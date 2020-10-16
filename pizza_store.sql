@@ -1,0 +1,115 @@
+-- MySQL dump 10.13  Distrib 8.0.21, for Linux (x86_64)
+--
+-- Host: localhost    Database: pizza_store
+-- ------------------------------------------------------
+-- Server version	8.0.21-0ubuntu0.20.04.4
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `TBLCUSTOMERS`
+--
+
+DROP TABLE IF EXISTS `TBLCUSTOMERS`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `TBLCUSTOMERS` (
+  `CUST_ID` int NOT NULL AUTO_INCREMENT,
+  `CUST_EMAIL` varchar(30) NOT NULL,
+  `CUST_NAME` varchar(30) NOT NULL,
+  `CUST_DOB` date DEFAULT NULL,
+  `CUST_ADDRESS` varchar(50) DEFAULT NULL,
+  `CUST_PHONE` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`CUST_ID`),
+  UNIQUE KEY `UC_TBLCUSTOMERS` (`CUST_ID`,`CUST_EMAIL`),
+  UNIQUE KEY `CUST_EMAIL` (`CUST_EMAIL`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+
+--
+-- Table structure for table `TBLORDER`
+--
+
+DROP TABLE IF EXISTS `TBLORDER`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `TBLORDER` (
+  `ORD_ID` int NOT NULL AUTO_INCREMENT,
+  `CUST_ID` int NOT NULL,
+  `ORD_DATE` date DEFAULT NULL,
+  PRIMARY KEY (`ORD_ID`),
+  KEY `FK_CUSTID` (`CUST_ID`),
+  CONSTRAINT `FK_CUSTID` FOREIGN KEY (`CUST_ID`) REFERENCES `TBLCUSTOMERS` (`CUST_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+
+--
+-- Table structure for table `TBLPIZZA`
+--
+
+DROP TABLE IF EXISTS `TBLPIZZA`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `TBLPIZZA` (
+  `PIZZA_ID` int NOT NULL AUTO_INCREMENT,
+  `PIZZA_DOUGH` varchar(50) DEFAULT NULL,
+  `PIZZA_CHEESE` varchar(30) DEFAULT NULL,
+  `PIZZA_SAUCE` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`PIZZA_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+
+--
+-- Table structure for table `TBLPIZZAORDERS`
+--
+
+DROP TABLE IF EXISTS `TBLPIZZAORDERS`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `TBLPIZZAORDERS` (
+  `PO_ID` int NOT NULL AUTO_INCREMENT,
+  `ORD_ID` int DEFAULT NULL,
+  `PIZZA_ID` int DEFAULT NULL,
+  PRIMARY KEY (`PO_ID`),
+  KEY `FK_POPIZZAID` (`PIZZA_ID`),
+  KEY `FK_POORDID` (`ORD_ID`),
+  CONSTRAINT `FK_POORDID` FOREIGN KEY (`ORD_ID`) REFERENCES `TBLORDER` (`ORD_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_POPIZZAID` FOREIGN KEY (`PIZZA_ID`) REFERENCES `TBLPIZZA` (`PIZZA_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `TBLTOPPING`
+--
+
+DROP TABLE IF EXISTS `TBLTOPPING`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `TBLTOPPING` (
+  `TOPP_ID` int NOT NULL AUTO_INCREMENT,
+  `PIZZA_ID` int DEFAULT NULL,
+  `TOPP_TOPPING` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`TOPP_ID`),
+  KEY `FK_PIZZAID` (`PIZZA_ID`),
+  CONSTRAINT `FK_PIZZAID` FOREIGN KEY (`PIZZA_ID`) REFERENCES `TBLPIZZA` (`PIZZA_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+-- Dump completed on 2020-10-15 18:47:41
