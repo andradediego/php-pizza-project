@@ -1,8 +1,8 @@
 <?php 
     define('DBHOST', 'localhost');
-    define('DBDB', 'lab2');
-    define('DBUSER', 'lamp1user');
-    define('DBPW', '!Lamp12!');
+    define('DBDB', 'pizza_store');
+    define('DBUSER', 'pizzauser');
+    define('DBPW', 'pizza123');
 
     function connectDB() {
         $dsn = 'mysql:host='.DBHOST.';dbname='.DBDB.';charset=utf8';
