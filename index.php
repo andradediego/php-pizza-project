@@ -1,4 +1,5 @@
 <?php
+    // user post
     if (isset($_POST['username'])) {
         $username = $_POST['username'];
 
@@ -35,7 +36,7 @@
                 exit(1);
             }  
         } else {
-            header("Location:orderpizza.php");
+            header("Location:orderPizza.php");
         }
     }
 ?>
@@ -45,14 +46,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizzeria - Team Brazucas</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <title>Team Brazucas Pizzeria</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
 </head>
 <body>
+    <?php
+        // navigation menu
+        require_once('./navigationMenu.php');
+    ?>
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-md-offset-4 col-md-4">
-                <h2 class="text-center">Pizzeria Team Brazucas</h2>
+                <h2 class="text-center">Team Brazucas Pizzeria</h2>
                 <p class="text-center">We welcome you to taste the best pizza in London Ontario</p>
             </div>
             <hr>
@@ -67,5 +72,7 @@
             </div>
         </div>
     </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 </body>
 </html>
