@@ -4,7 +4,43 @@
     require_once('./utils/sauces.php');
     require_once('./utils/toppings.php');
     require_once('./utils/cheeses.php');
-?>
+
+    
+    require_once('./common.php');
+    $db_conn = connectDB(); 
+    
+
+    // insert data to tblPizza
+
+    if(isset($_POST['submit']))
+    {   
+        $PIZZA_DOUGH = $_POST['PIZZA_DOUGH'];
+        $PIZZA_SAUCE = $_POST['PIZZA_SAUCE'];
+        $PIZZA_CHEESE = $_POST['PIZZA_CHEESE'];
+        
+            $stmt= $db_conn->prepare('INSERT INTO TBLPIZZA (PIZZA_DOUGH, PIZZA_SAUCE, PIZZA_CHEESE)
+            values(:PIZZA_DOUGH, :PIZZA_SAUCE, :PIZZA_CHEESE)');
+            
+            if (!$stmt){
+                echo "Error ".$db_conn->errorCode()."\nMessage".implode($db_conn->errorInfo())."\n";
+                exit(1);
+            }
+
+            $data = array(
+                ":PIZZA_DOUGH" => $PIZZA_DOUGH, 
+                ":PIZZA_SAUCE" => $PIZZA_SAUCE, 
+                ":PIZZA_CHEESE" => $PIZZA_CHEESE
+            );
+
+            $status = $stmt->execute($data);
+                        
+            if(!$status){
+                echo "Error ".$stmt->errorCode()
+                ."\nMessage".implode($stmt->errorInfo())."\n";
+                exit(1);
+            }
+    }
+?>      
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,7 +58,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-md-offset-4 col-md-4">
-                <form>
+                <form method="post">
                     <div class="form-group">
                         <label for="PIZZA_DOUGH">Dough</label>
                         <select class="form-control" name="PIZZA_DOUGH" id="PIZZA_DOUGH">
@@ -36,7 +72,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="PIZZA_SAUCE">Dough</label>
+                        <label for="PIZZA_SAUCE">Sauce</label>
                         <select class="form-control" name="PIZZA_SAUCE" id="PIZZA_SAUCE">
                             <option value="">Please select</option>
                             <?php
@@ -58,16 +94,16 @@
                         </select>
                     </div>	
                     <?php
-                        foreach ($toppings as $topping) {                
-                        echo '<div class="checkbox">
+                        foreach ($toppings as $topping) {
+                        echo '<div class="classCheckbox">
                                 <label>
-                                    <input type="checkbox" name="PIZZA_TOPPING" value="' . $topping . '">' . $topping . '
+                                    <input type="checkbox" name="PIZZA_TOPPING[ ]" value= "" ' . $topping . '">' . $topping . '
                                 </label>
                             </div>';
                         }	
                     ?>
                    	<hr>
-                    <button type="submit" class="btn btn-primary btn-block">Add Another Pizza</button>   
+                    <button type="submit" name="submit" class="btn btn-primary btn-block">Add Another Pizza</button>   
                     <button type="submit" class="btn btn-success btn-block">Order Now</button>
                 </form> 
             </div>

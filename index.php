@@ -36,7 +36,7 @@
                 exit(1);
             }  
         } else {
-            header("Location:orderPizza.php");
+            header("Location:orderpizza.php");
         }
     }
 ?>
