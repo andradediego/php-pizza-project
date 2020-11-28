@@ -1,15 +1,15 @@
 <?php 
     // defines for windows
-    //define('DBHOST', 'localhost');
-    //define('DBDB', 'pizza_store');
-    //define('DBUSER', 'root');
-    //define('DBPW', '');
+    define('DBHOST', 'localhost');
+    define('DBDB', 'pizza_store');
+    define('DBUSER', 'root');
+    define('DBPW', '');
 
     //defines for Linux
-     define('DBHOST', 'localhost');
-     define('DBDB', 'pizza_store');
-     define('DBUSER', 'pizzauser');
-     define('DBPW', 'pizza123');
+    //define('DBHOST', 'localhost');
+    //define('DBDB', 'pizza_store');
+    //define('DBUSER', 'pizzauser');
+    //define('DBPW', 'pizza123');
 
     function connectDB() {
         $dsn = 'mysql:host='.DBHOST.';dbname='.DBDB.';charset=utf8';

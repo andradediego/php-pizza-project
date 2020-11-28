@@ -1,43 +1,24 @@
 <?php
+    // var_dump($_POST['username']);
     // user post
-    if (isset($_POST['username'])) {
-        $username = $_POST['username'];
+    require_once('./utils/session.php');
 
-        require_once('./common.php');
+    if (isset($_POST['useremail'])) {
+        $useremail = addslashes(trim($_POST['useremail']));
 
-        $db_conn = connectDB();
+        require_once('./utils/user/userInformationFunctions.php');
 
-        $stmt = $db_conn->prepare('select * from TBLCUSTOMERS where CUST_EMAIL = ?');
-        if (!$stmt) {
-            echo 'Error '.$dbc->errorCode().'\n Message '.implode($dbc->errorInfo()).'\n';
-            exit(1);
-        }
+        $user = getData('select * from TBLCUSTOMERS where CUST_EMAIL = ?', array($useremail));         
 
-        $status = $stmt->execute([$username]); 
+        if (!$user) {            
+            insertData('insert into TBLCUSTOMERS (CUST_EMAIL) values (?)', array($useremail));
+            $user = getData('select * from TBLCUSTOMERS where CUST_EMAIL = ?', array($useremail));
+        } 
         
-        if (!$status) {
-            echo 'Error '.$stmt.errorCode().'\n Message'.implode($stmt->errorInfo()).'\n';
-            exit(1);
-        }  
-        $user = $stmt->fetch();
-
-        if (!$user) {
-            $stmt = $db_conn->prepare('insert into TBLCUSTOMERS (CUST_EMAIL, CUST_NAME) values (?, ?)');
-
-            if (!$stmt) {
-                echo 'Error '.$dbc->errorCode().'\n Message '.implode($dbc->errorInfo()).'\n';
-                exit(1);
-            }
-
-            $status = $stmt->execute(array($username, $username));
-
-            if (!$status) {
-                echo 'Error '.$stmt.errorCode().'\n Message'.implode($stmt->errorInfo()).'\n';
-                exit(1);
-            }  
-        } else {
-            header("Location:orderpizza.php");
-        }
+        $_SESSION['user'] = $user;
+        // var_dump($_SESSION['user']);
+        $_SESSION['islogged'] = true; 
+        header("Location:orderpizza.php");
     }
 ?>
 
@@ -65,7 +46,7 @@
                 <p class="text-center">Please enter you e-mail to order online</p>
                 <form action="index.php" method="post">
                     <div class="form-group">							
-						<input type="email" name="username" class="form-control" id="username" placeholder="jane.doe@gmail.com">							
+						<input type="email" name="useremail" class="form-control" id="useremail" placeholder="jane.doe@gmail.com">							
 					</div>
                     <input type="submit" class="btn btn-block btn-success" id="btn-submit" value="Begin">
                 </form>

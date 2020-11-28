@@ -1,4 +1,12 @@
 <?php
+    require_once('./utils/session.php');
+
+    // var_dump($_SESSION['user']);
+
+    if (!$_SESSION['islogged']) {
+        header("Location:index.php");
+    }
+
     // load all variables
     require_once('./utils/doughs.php');
     require_once('./utils/sauces.php');
@@ -7,10 +15,9 @@
 
     
     require_once('./common.php');
-    $db_conn = connectDB(); 
-    
+    $db_conn = connectDB();    
 
-    // insert data to tblPizza
+    
 
     if(isset($_POST['submit']))
     {   
