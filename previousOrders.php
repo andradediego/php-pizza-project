@@ -13,7 +13,7 @@
     ?>
     <div class="container">
         <div class="row">
-						<div class="col-sm-12 col-md-offset-4 col-md-4">
+			<div class="col-sm-12 col-md-offset-4 col-md-4">
                 <h3>Comming soon</h3>
             </div>
         </div>

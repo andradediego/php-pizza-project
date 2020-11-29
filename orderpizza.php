@@ -1,5 +1,6 @@
 <?php
     require_once('./utils/session.php');
+    
 
     // var_dump($_SESSION['user']);
 
@@ -13,39 +14,49 @@
     require_once('./utils/toppings.php');
     require_once('./utils/cheeses.php');
 
-    
-    require_once('./common.php');
-    $db_conn = connectDB();    
+    require_once('./utils/order/orderPizzaData.php');
 
-    
-
-    if(isset($_POST['submit']))
-    {   
-        $PIZZA_DOUGH = $_POST['PIZZA_DOUGH'];
-        $PIZZA_SAUCE = $_POST['PIZZA_SAUCE'];
-        $PIZZA_CHEESE = $_POST['PIZZA_CHEESE'];
+    // tblorder
+    // tblpizza
+    // order_pizza
+    // var_dump($_POST);
+    if (isset($_POST['PIZZA_DOUGH']) && isset($_POST['PIZZA_SAUCE']) && isset($_POST['PIZZA_CHEESE']) && isset($_POST['PIZZA_TOPPING'])
+    && strlen(trim($_POST['PIZZA_DOUGH'])) > 0 && strlen(trim($_POST['PIZZA_SAUCE'])) > 0 && strlen(trim($_POST['PIZZA_CHEESE'])) > 0
+    && (count($_POST['PIZZA_TOPPING']) > 0 && count($_POST['PIZZA_TOPPING']) < 6)) {
         
-            $stmt= $db_conn->prepare('INSERT INTO TBLPIZZA (PIZZA_DOUGH, PIZZA_SAUCE, PIZZA_CHEESE)
-            values(:PIZZA_DOUGH, :PIZZA_SAUCE, :PIZZA_CHEESE)');
-            
-            if (!$stmt){
-                echo "Error ".$db_conn->errorCode()."\nMessage".implode($db_conn->errorInfo())."\n";
-                exit(1);
-            }
+        require_once('./utils/user/userInformationFunctions.php');
 
-            $data = array(
-                ":PIZZA_DOUGH" => $PIZZA_DOUGH, 
-                ":PIZZA_SAUCE" => $PIZZA_SAUCE, 
-                ":PIZZA_CHEESE" => $PIZZA_CHEESE
-            );
+        $user = $_SESSION['user'];
+        // var_dump($user);
 
-            $status = $stmt->execute($data);
-                        
-            if(!$status){
-                echo "Error ".$stmt->errorCode()
-                ."\nMessage".implode($stmt->errorInfo())."\n";
-                exit(1);
-            }
+        $idOrder = insertData('insert into tblorder (CUST_ID) values (?)', 
+        array($user['CUST_ID']));        
+        // var_dump($idOrder);
+
+        $dough = addslashes(trim($_POST['PIZZA_DOUGH']));
+        $sauce = addslashes(trim($_POST['PIZZA_SAUCE']));
+        $cheese = addslashes(trim($_POST['PIZZA_CHEESE']));        
+        $postData = array($dough, $sauce, $cheese);
+
+        $count = 1;
+        foreach ($_POST['PIZZA_TOPPING'] as &$value) {
+            $postData[] = addslashes(trim($value));
+            $count++;
+        }
+
+        for ($i = $count; $i < 6; $i++) {
+            $postData[] = null;
+        }
+        // var_dump($postData);
+        $idPizza = insertData('insert into tblpizza (PIZZA_DOUGH, PIZZA_SAUCE, PIZZA_CHEESE, PIZZA_TOPPING1, PIZZA_TOPPING2, PIZZA_TOPPING3, PIZZA_TOPPING4, PIZZA_TOPPING5) values (?, ?, ?, ?, ?, ?, ?, ?)', 
+        $postData);
+        
+        insertData('insert into order_pizza (ORD_ID, PIZZA_ID) values (?, ?)', 
+        array($idOrder, $idPizza)); 
+        $_SESSION['ORD_ID'] = $idOrder;        
+        header("Location:orderSummary.php");
+    } else {
+
     }
 ?>      
 
@@ -65,7 +76,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-md-offset-4 col-md-4">
-                <form method="post">
+                <form action="orderpizza.php" method="post">
                     <div class="form-group">
                         <label for="PIZZA_DOUGH">Dough</label>
                         <select class="form-control" name="PIZZA_DOUGH" id="PIZZA_DOUGH">
@@ -104,19 +115,38 @@
                         foreach ($toppings as $topping) {
                         echo '<div class="classCheckbox">
                                 <label>
-                                    <input type="checkbox" name="PIZZA_TOPPING[ ]" value= "" ' . $topping . '">' . $topping . '
+                                    <input type="checkbox" name="PIZZA_TOPPING[]" value="' . $topping . '">' . $topping . '
                                 </label>
                             </div>';
                         }	
                     ?>
                    	<hr>
-                    <button type="submit" name="submit" class="btn btn-primary btn-block">Add Another Pizza</button>   
-                    <button type="submit" class="btn btn-success btn-block">Order Now</button>
+                    <button type="button" id="btn-add-pizza" class="btn btn-primary btn-block">Add Another Pizza</button>   
+                    <button type="submit" id="btn-order-now" class="btn btn-success btn-block">Order Now</button>
                 </form> 
             </div>
         </div>
     </div>
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script>
+        $("input[name='PIZZA_TOPPING[]']").on('click', function (e) {            
+            if ($("input[name='PIZZA_TOPPING[]']:checkbox:checked").length > 5) {
+                alert('The maximum topping allowed is 5!');
+                $(this).prop('checked', false);
+            }
+        });
+
+        $('#btn-order-now').on('click', function(e) {
+            var toppingSelected = $("input[name='PIZZA_TOPPING[]']:checkbox:checked");
+            if (toppingSelected.length < 1) {
+                alert('Selected at least 1 topping!');
+                e.preventDefault();
+            } else if (toppingSelected.length > 6) {
+                alert('The maximum topping allowed is 5!');
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>

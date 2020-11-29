@@ -42,7 +42,9 @@
 				array($name, $address, $city, $province, $postalCode, $phone, $email, $userOld['CUST_ID']));
 
 			$_SESSION['user'] = getData('select * from TBLCUSTOMERS where CUST_EMAIL = ? and CUST_ID = ?', array($cust_email, $cust_id));	
-			$userData = setUserData($userData);						
+			$userData = setUserData($userData);	
+			
+			header("Location:userInformation.php");					
 		} 
 		
 	} else {		
