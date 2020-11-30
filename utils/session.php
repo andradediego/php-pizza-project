@@ -8,4 +8,8 @@
 	if (!isset($_SESSION['user'])){
 			$_SESSION['user'] = null;        
 	}
+
+	if (!isset($_SESSION['orders'])){
+		$_SESSION['orders'] = array();        
+	}
 ?>

@@ -1,8 +1,19 @@
 <?php
+	$displayName = '';
 	
 	if (!isset($_SESSION['islogged'])){
 		$_SESSION['islogged'] = false;        
 	}
+
+	if (isset($_SESSION['user'])){
+		$user = $_SESSION['user'];
+		if (strlen(trim($user['CUST_NAME'])) > 0) {
+			$displayName = trim($user['CUST_NAME']);
+		} else {
+			$displayName = trim($user['CUST_EMAIL']);
+		}        
+	}
+
 
 	$menu = 
 		'<nav class="navbar navbar-default">
@@ -22,10 +33,12 @@
 				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">					
 						<ul class="nav navbar-nav navbar-right">';
 
-	if ($_SESSION['islogged'] == true) {
-		$menu = $menu . '<li><a href="userInformation.php">Profile</a></li>
+	if ($_SESSION['islogged']) {
+		$menu = $menu . 
+							'<li><a href="userInformation.php">Profile ('.$displayName.')</a></li>
 							<li><a href="orderPizza.php">Orders</a></li>
-							<li><a href="orderPizza.php">Previous Orders</a></li>';
+							<li><a href="previousOrders.php">Previous Orders</a></li>
+							<li><a href="#"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span><span class="badge">'.count($_SESSION['orders']).'</span></a></li>';
 	} 
 
 								

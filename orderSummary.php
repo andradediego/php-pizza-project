@@ -1,6 +1,10 @@
 <?php
     require_once('./utils/session.php');
 
+    if ($_SESSION['user'] == null) {
+        header("Location:index.php");
+    }
+
     if (!isset($_SESSION['ORD_ID'])){
         header("Location:orderPizza.php");
     }
@@ -31,10 +35,10 @@
                     $user = $_SESSION['user'];
                     echo '<h4>'.$user['CUST_EMAIL'].' ordered:</h4>';
                     echo '<hr/>';
-                    
+                    $countPizza = 1;
                     foreach ($pizzas as &$pizza) {                        
                         $toppings = '';
-                        $countPizza = 1;
+                        
                         $count = 1;
                         while ($pizza['PIZZA_TOPPING' . $count] != null) {
                             $toppings = $toppings . '<li><em>'. $pizza['PIZZA_TOPPING' . $count] .'</em></li>';
@@ -57,6 +61,8 @@
                                     </ul>
                                 </li>
                             </ul>';
+                            
+                        $countPizza++;
                     }
                     echo 
                         '<p>

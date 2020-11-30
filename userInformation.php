@@ -4,8 +4,8 @@
 	require_once('./utils/session.php');
 	require_once('./utils/user/userInformationData.php');
 	
-	
 	$userData = setUserData($userData);	
+	$successMessage = '';
 	
 	
 	if (isset($_POST['CUST_EMAIL']) && isset($_POST['CUST_NAME']) && isset($_POST['CUST_ADDRESS']) && isset($_POST['CUST_CITY'])
@@ -44,9 +44,14 @@
 			$_SESSION['user'] = getData('select * from TBLCUSTOMERS where CUST_EMAIL = ? and CUST_ID = ?', array($cust_email, $cust_id));	
 			$userData = setUserData($userData);	
 			
-			header("Location:userInformation.php");					
-		} 
-		
+			if (isset($_SESSION['needUserDetails']) && $_SESSION['needUserDetails']) {
+				unset($_SESSION['needUserDetails']);
+				header("Location:orderPizzaNow.php");
+			} else {
+				$successMessage = "Your data updated successfully";
+				header("Location:userInformation.php");
+			}
+		}
 	} else {		
 		$userErrors['CUST_EMAIL'] = isset($_POST['CUST_EMAIL']) && strlen(trim($_POST['CUST_EMAIL'])) == 0;
 		$userErrors['CUST_NAME'] = isset($_POST['CUST_NAME']) && strlen(trim($_POST['CUST_NAME'])) == 0;
@@ -74,6 +79,11 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-md-offset-4 col-md-4">
+							<?php 
+								if (strlen($successMessage)) {
+									echo '<p class="bg-success">'.$successMessage.'</p>';
+								}
+							?>
 							<form action="userInformation.php" method="post">
 								<div class="<?php echo $userErrors['CUST_EMAIL'] ? 'form-group has-error' : 'form-group' ?>">
 									<label for="CUST_EMAIL">Email</label>

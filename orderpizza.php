@@ -1,10 +1,7 @@
 <?php
     require_once('./utils/session.php');
     
-
-    // var_dump($_SESSION['user']);
-
-    if (!$_SESSION['islogged']) {
+    if (!$_SESSION['islogged'] || $_SESSION['user'] == null) {
         header("Location:index.php");
     }
 
@@ -13,50 +10,13 @@
     require_once('./utils/sauces.php');
     require_once('./utils/toppings.php');
     require_once('./utils/cheeses.php');
-
-    require_once('./utils/order/orderPizzaData.php');
-
-    // tblorder
-    // tblpizza
-    // order_pizza
+    
     // var_dump($_POST);
-    if (isset($_POST['PIZZA_DOUGH']) && isset($_POST['PIZZA_SAUCE']) && isset($_POST['PIZZA_CHEESE']) && isset($_POST['PIZZA_TOPPING'])
-    && strlen(trim($_POST['PIZZA_DOUGH'])) > 0 && strlen(trim($_POST['PIZZA_SAUCE'])) > 0 && strlen(trim($_POST['PIZZA_CHEESE'])) > 0
-    && (count($_POST['PIZZA_TOPPING']) > 0 && count($_POST['PIZZA_TOPPING']) < 6)) {
-        
-        require_once('./utils/user/userInformationFunctions.php');
-
-        $user = $_SESSION['user'];
-        // var_dump($user);
-
-        $idOrder = insertData('insert into tblorder (CUST_ID) values (?)', 
-        array($user['CUST_ID']));        
-        // var_dump($idOrder);
-
-        $dough = addslashes(trim($_POST['PIZZA_DOUGH']));
-        $sauce = addslashes(trim($_POST['PIZZA_SAUCE']));
-        $cheese = addslashes(trim($_POST['PIZZA_CHEESE']));        
-        $postData = array($dough, $sauce, $cheese);
-
-        $count = 1;
-        foreach ($_POST['PIZZA_TOPPING'] as &$value) {
-            $postData[] = addslashes(trim($value));
-            $count++;
-        }
-
-        for ($i = $count; $i < 6; $i++) {
-            $postData[] = null;
-        }
-        // var_dump($postData);
-        $idPizza = insertData('insert into tblpizza (PIZZA_DOUGH, PIZZA_SAUCE, PIZZA_CHEESE, PIZZA_TOPPING1, PIZZA_TOPPING2, PIZZA_TOPPING3, PIZZA_TOPPING4, PIZZA_TOPPING5) values (?, ?, ?, ?, ?, ?, ?, ?)', 
-        $postData);
-        
-        insertData('insert into order_pizza (ORD_ID, PIZZA_ID) values (?, ?)', 
-        array($idOrder, $idPizza)); 
-        $_SESSION['ORD_ID'] = $idOrder;        
-        header("Location:orderSummary.php");
-    } else {
-
+    $errors = null;
+    if (isset($_SESSION['errorsOrder']) && count($_SESSION['errorsOrder']) > 0) {
+        // var_dump($_SESSION['errorsOrder']);
+        $errors = $_SESSION['errorsOrder'];
+        unset($_SESSION['errorsOrder']);
     }
 ?>      
 
@@ -74,10 +34,12 @@
         require_once('./navigationMenu.php');
     ?>
     <div class="container">
+    
+    <?php echo '<input type="hidden" name="orders-cart" id="orders-cart" value="'.count($_SESSION['orders']).'">'; ?>
         <div class="row">
             <div class="col-sm-12 col-md-offset-4 col-md-4">
-                <form action="orderpizza.php" method="post">
-                    <div class="form-group">
+                <form id="order-form" method="post">
+                    <div class="<?php echo $errors['PIZZA_DOUGH'] ? 'form-group has-error' : 'form-group' ?>">
                         <label for="PIZZA_DOUGH">Dough</label>
                         <select class="form-control" name="PIZZA_DOUGH" id="PIZZA_DOUGH">
                             <option value="">Please select</option>
@@ -87,9 +49,10 @@
                                 }	
                             ?>										
                         </select>
+                        <?php echo $errors['PIZZA_DOUGH'] ? '<span class="help-block">Please select the type of dough!</span>' : '' ?> 
                     </div>
 
-                    <div class="form-group">
+                    <div class="<?php echo $errors['PIZZA_SAUCE'] ? 'form-group has-error' : 'form-group' ?>">
                         <label for="PIZZA_SAUCE">Sauce</label>
                         <select class="form-control" name="PIZZA_SAUCE" id="PIZZA_SAUCE">
                             <option value="">Please select</option>
@@ -99,8 +62,9 @@
                                 }	
                             ?>										
                         </select>
+                        <?php echo $errors['PIZZA_SAUCE'] ? '<span class="help-block">Please select the type of sauce!</span>' : '' ?> 
                     </div>
-                    <div class="form-group">
+                    <div class="<?php echo $errors['PIZZA_CHEESE'] ? 'form-group has-error' : 'form-group' ?>">
                         <label for="PIZZA_CHEESE">Cheese</label>
                         <select class="form-control" name="PIZZA_CHEESE" id="PIZZA_CHEESE">
                             <option value="">Please select</option>
@@ -110,16 +74,54 @@
                                 }	
                             ?>										
                         </select>
-                    </div>	
+                        <?php echo $errors['PIZZA_CHEESE'] ? '<span class="help-block">Please select the type of cheese!</span>' : '' ?> 
+                    </div>
+                    <h5 class="text-center"><strong>Toppings</strong></h5>
+                    <?php echo $errors['PIZZA_TOPPING'] ? '<h4 class="help-block has error">Please select at least one topic!</h4>' : '' ?> 	
                     <?php
                         foreach ($toppings as $topping) {
                         echo '<div class="classCheckbox">
+                                
                                 <label>
-                                    <input type="checkbox" name="PIZZA_TOPPING[]" value="' . $topping . '">' . $topping . '
+                                    <input type="checkbox" name="PIZZA_TOPPING[]" value="' . $topping . '"> ' . $topping . '
                                 </label>
                             </div>';
                         }	
+
+                        if (count($_SESSION['orders']) > 0) {
+                            echo '<hr>';
+                            $orders = $_SESSION['orders'];
+                            $countPizza = 1;  
+                            foreach ($orders as &$pizza) {   
+                                // var_dump($pizza);
+                                // var_dump($pizza['PIZZA_DOUGH']);
+                                $toppings = '';
+                                                              
+                                foreach ($pizza['PIZZA_TOPPING'] as &$topping) {
+                                    $toppings = $toppings . '<li><em>'. $topping .'</em></li>';                                    
+                                }
+                                echo 
+                                    '<ul>
+                                        <li>
+                                            Pizza '.$countPizza.'
+                                            <ul>
+                                                <li><strong>Dough:</strong> '.$pizza['PIZZA_DOUGH'].'</li>
+                                                <li><strong>Sauce:</strong> '.$pizza['PIZZA_SAUCE'].'</li>
+                                                <li><strong>Cheese:</strong> '.$pizza['PIZZA_CHEESE'].'</li>
+                                                <li>
+                                                    <strong>Toppings</strong>
+                                                    <ul>
+                                                        '.$toppings.'
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>';
+                                    $countPizza++;
+                            }
+                        }
                     ?>
+                    
                    	<hr>
                     <button type="button" id="btn-add-pizza" class="btn btn-primary btn-block">Add Another Pizza</button>   
                     <button type="submit" id="btn-order-now" class="btn btn-success btn-block">Order Now</button>
@@ -128,7 +130,7 @@
         </div>
     </div>
     <script src="js/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>    
     <script>
         $("input[name='PIZZA_TOPPING[]']").on('click', function (e) {            
             if ($("input[name='PIZZA_TOPPING[]']:checkbox:checked").length > 5) {
@@ -138,13 +140,30 @@
         });
 
         $('#btn-order-now').on('click', function(e) {
+            e.preventDefault();
+            
+            var toppingSelected = $("input[name='PIZZA_TOPPING[]']:checkbox:checked");
+            if ($('#orders-cart').val() > 0) {
+                $('#order-form').attr('action', "orderPizzaNow.php").submit();
+            } else if (toppingSelected.length < 1) {
+                alert('Selected at least 1 topping!');
+            } else if (toppingSelected.length > 6) {
+                alert('The maximum topping allowed is 5!');                
+            } else {
+                $('#order-form').attr('action', "orderPizzaNow.php").submit();
+            }
+        });
+
+        $('#btn-add-pizza').on('click', function(e) {
+            e.preventDefault();
             var toppingSelected = $("input[name='PIZZA_TOPPING[]']:checkbox:checked");
             if (toppingSelected.length < 1) {
                 alert('Selected at least 1 topping!');
-                e.preventDefault();
+                
             } else if (toppingSelected.length > 6) {
-                alert('The maximum topping allowed is 5!');
-                e.preventDefault();
+                alert('The maximum topping allowed is 5!');                
+            } else {
+                $('#order-form').attr('action', "addPizzaOrder.php").submit();
             }
         });
     </script>
